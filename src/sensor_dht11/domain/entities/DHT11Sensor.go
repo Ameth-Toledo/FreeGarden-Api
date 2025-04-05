@@ -1,6 +1,6 @@
 package entities
 
-type DTH11Sensor struct {
+type DHT11Sensor struct {
 	ID          int     `json:"id"`
 	UserID      int     `json:"user_id"`
 	Temperature float64 `json:"temperature"`
