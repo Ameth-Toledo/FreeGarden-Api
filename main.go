@@ -4,6 +4,7 @@ import (
 	"FreeGarden/src/core"
 	"FreeGarden/src/sensor_humidity/infraestructure/dependencies_h"
 	"FreeGarden/src/sensor_humidity/routes_h"
+	dependencies_ph "FreeGarden/src/sensor_pH/infrastructure/dependencies"
 	"FreeGarden/src/sensor_ultrasonico/infrastructure/dependencies"
 	"log"
 )
@@ -26,6 +27,7 @@ func main() {
 	}
 
 	router, _, _ := dependencies.InitializeSensorUltrasonicDependencies()
+	router, _, _ = dependencies_ph.InitializeSensorPhDependencies()
 
 	routes_h.RegisterHumidityRoutes(
 		router,
