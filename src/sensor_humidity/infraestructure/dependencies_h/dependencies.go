@@ -10,12 +10,8 @@ import (
 )
 
 func Init(pool *core.Conn_MySQL) (
-	*controllers.Create_Humidity_C,
-	*controllers.GetHumidityByIDController,
-	*controllers.GetAllHumidityController,
-	*controllers.DeleteHumidityController,
-	*controllers.GetAverageHumidityController,
-	*controllers.GetLatestHumidityController,
+	*controllers.SaveHumidityController,
+	*controllers.GetValueHumidityController,
 	*repositories.ServiceNotification,
 
 	error,
@@ -31,26 +27,11 @@ func Init(pool *core.Conn_MySQL) (
 
 	serviceNotification := repositories.NewServiceNotification(rabbitMQAdapter)
 
-	createUseCase := use_case.NewCreate_Humidity(repository, serviceNotification)
-	getHeartRateByIDUseCase := use_case.NewGetMeasurementByID(repository)
-	getAllUseCase := use_case.NewGet_All(repository)
-	deleteUseCase := use_case.NewDelete_Humidty(repository)
-	getAverageHeartRateUseCase := use_case.NewGetAverageHumidity(repository)
-	getLatestMeasurementUseCase := use_case.NewGet_Latest(repository)
+	createUseCase := use_case.NewSaveHumidity(repository)
+	getUseCase := use_case.NewGetValueHumidity(repository)
 
-	createController := controllers.NewCreate_Humidity_C(createUseCase)
-	getHeartRateByIDController := controllers.NewGetHumidityIDController(getHeartRateByIDUseCase)
-	getAllController := controllers.NewGetAllHumidityController(getAllUseCase)
-	deleteController := controllers.NewDeleteHumiditypController(deleteUseCase)
-	getAverageHeartRateController := controllers.NewGetAverageHumidityController(getAverageHeartRateUseCase)
-	getLatestMeasurementController := controllers.NewGetLatestHumidityController(getLatestMeasurementUseCase)
+	createController := controllers.NewSaveHumidityController(createUseCase)
+	getController := controllers.NewGetValueHUmidityController(getUseCase)
 
-	return createController,
-		getHeartRateByIDController,
-		getAllController,
-		deleteController,
-		getAverageHeartRateController,
-		getLatestMeasurementController,
-		serviceNotification,
-		nil
+	return createController, getController, serviceNotification, nil
 }

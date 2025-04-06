@@ -7,12 +7,12 @@ import (
 
 // SetupRoutes configura las rutas de la API
 func SetupRoutes(router *gin.Engine, saveDistanceController *controller.SaveDistanceController, getDistanceController *controller.GetDistanceController) {
-	api := router.Group("/sensor")
+	api := router.Group("/api/sensor-ultrasonic")
 	{
 		// Ruta para guardar el sensor ultrasónico
-		api.POST("/ultrasonic", saveDistanceController.SaveDistance)
+		api.POST("/create", saveDistanceController.SaveDistance)
 
 		// Ruta para obtener la distancia del sensor
-		api.GET("/ultrasonic/:user_id", getDistanceController.GetDistance)
+		api.GET("/get/:user_id", getDistanceController.GetDistance)
 	}
 }

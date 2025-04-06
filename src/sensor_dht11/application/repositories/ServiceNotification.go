@@ -13,12 +13,12 @@ func NewServiceNotification(notificationPort NotificationPort) *ServiceNotificat
 	return &ServiceNotification{notificationPort: notificationPort}
 }
 
-func (notification *ServiceNotification) NotifyAppoinmentCreated(appointment entities.DHT11Sensor) error {
+func (notification *ServiceNotification) NotifyAppoinmentCreated(sensor entities.DHT11Sensor) error {
 	log.Println("Notificando")
 
-	err := notification.notificationPort.PublishEvent("cita creada", appointment)
+	err := notification.notificationPort.PublishEvent("sensor creada", sensor)
 	if err != nil {
-		log.Printf("Error al pubicar el evento: %v", err)
+		log.Printf("Error al publicar el evento: %v", err)
 		return err
 	}
 	return nil

@@ -7,26 +7,27 @@ import (
 	"net/http"
 )
 
-type Create_Humidity_C struct {
-	UseCase *use_case.CreateHumidity
+type SaveHumidityController struct {
+	saveHumidityUseCase *use_case.SaveHumidity
 }
 
-func NewCreate_Humidity_C(useCase *use_case.CreateHumidity) *Create_Humidity_C {
-	return &Create_Humidity_C{UseCase: useCase}
+func NewSaveHumidityController(saveHumidityUseCase *use_case.SaveHumidity) *SaveHumidityController {
+	return &SaveHumidityController{saveHumidityUseCase: saveHumidityUseCase}
 }
 
-func (c *Create_Humidity_C) Execute(ctx *gin.Context) {
+func (controller *SaveHumidityController) SaveHumidity(c *gin.Context) {
 	var sensor entities.Humidity
 
-	if err := ctx.ShouldBindJSON(&sensor); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
-		return
-	}
-	createdSensor, err := c.UseCase.Execute(sensor)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar los datos"})
+	if err := c.ShouldBindJSON(&sensor); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "Datos guardados correctamente", "data": createdSensor})
+	savedSensor, err := controller.saveHumidityUseCase.SaveValue(sensor)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Value Humidity saved successfully", "data": savedSensor})
 }

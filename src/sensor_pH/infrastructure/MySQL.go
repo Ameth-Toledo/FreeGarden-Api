@@ -15,41 +15,42 @@ func NewMySQLpHRepository(db *core.Conn_MySQL) domain.PHRepository {
 	return &MySQLpHRepository{db: db}
 }
 
-func (repo *MySQLpHRepository) Save(ph entities.PhSensor) (entities.PhSensor, error) {
+func (repo *MySQLpHRepository) Save(sensor entities.PhSensor) (entities.PhSensor, error) {
+	// Definir la consulta SQL para insertar el sensor
+	query := `INSERT INTO water_ph_sensors (user_id, ph_value) VALUES (?, ?)`
 
-	query := `INSERT INTO ph_sensors (user_id, ph_value) VALUES (?, ?)`
-
-	result, err := repo.db.ExecutePreparedQuery(query, ph.UserID, ph.PhValue)
+	// Ejecutar la consulta utilizando la conexión y los valores del sensor
+	result, err := repo.db.ExecutePreparedQuery(query, sensor.UserID, sensor.PhValue)
 	if err != nil {
-		return ph, fmt.Errorf("error al guardar el ph sensor: %w", err)
+		return sensor, fmt.Errorf("error al guardar el sensor de pH: %w", err)
 	}
+
+	// Obtener el ID del registro insertado
 	id, err := result.LastInsertId()
 	if err != nil {
-		return ph, fmt.Errorf("error al guardar el ph sensor: %w", err)
+		return sensor, fmt.Errorf("error al obtener el ID del sensor insertado: %w", err)
 	}
-	ph.ID = int(id)
-	return ph, nil
+
+	sensor.ID = int(id)
+	return sensor, nil
 }
 
-func (repo *MySQLpHRepository) GetLastValue(userID int) (float64, error) {
-	query := `SELECT ph_value FROM ph_sensors WHERE user_id = ?`
-
+func (repo *MySQLpHRepository) GetLastValueByUserID(userID int) (entities.PhSensor, error) {
+	query := `SELECT id, user_id, ph_value FROM water_ph_sensors WHERE user_id = ? ORDER BY id DESC LIMIT 1`
 	rows, err := repo.db.FetchRows(query, userID)
 	if err != nil {
-		return 0, fmt.Errorf("error al obtene la ultima lectura del ph sensor: %w", err)
+		return entities.PhSensor{}, fmt.Errorf("error al obtener el último valor de pH: %w", err)
 	}
 	defer rows.Close()
 
-	var ph_value float64
+	var sensor entities.PhSensor
 	if rows.Next() {
-		if err := rows.Scan(&ph_value); err != nil {
-			return 0, fmt.Errorf("error al obtener el valor del ph sensor: %w", err)
+		if err := rows.Scan(&sensor.ID, &sensor.UserID, &sensor.PhValue); err != nil {
+			return entities.PhSensor{}, fmt.Errorf("error al escanear los datos del sensor: %w", err)
 		}
+	} else {
+		return entities.PhSensor{}, fmt.Errorf("no se encontró un valor de pH para el usuario %d", userID)
 	}
 
-	if ph_value == 0 {
-		return 0, fmt.Errorf("no se encontró un sensor de ph para el usuario %d", userID)
-	}
-
-	return ph_value, nil
+	return sensor, nil
 }
