@@ -12,7 +12,9 @@ import (
 )
 
 // InitializeSensorDHTDependencies configura las dependencias necesarias para el sensor DHT11.
-func InitializeSensorDHTDependencies() (*gin.Engine, *use_case.CreateDHT, *use_case.GetValueDHT, *repositories.ServiceNotification, error) {
+func InitializeSensorDHTDependencies(
+	router *gin.Engine,
+) (*use_case.CreateDHT, *use_case.GetValueDHT, *repositories.ServiceNotification, error) {
 	dbConn := core.GetDBPool()
 
 	DHTRepo := adapters.NewMySQLDHTRepository(dbConn)
@@ -20,22 +22,18 @@ func InitializeSensorDHTDependencies() (*gin.Engine, *use_case.CreateDHT, *use_c
 	saveDHTUseCase := use_case.NewCreateDHT(DHTRepo)
 	getValueUseCase := use_case.NewGetValueDHT(DHTRepo)
 
-	// Crear el adaptador de RabbitMQ
 	rabbitMQAdapter, err := adapters.NewRabbitMQAdapter()
 	if err != nil {
 		log.Printf("Error inicializando RabbitMQ: %v", err)
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	// Crear el servicio de notificación con RabbitMQ
 	serviceNotification := repositories.NewServiceNotification(rabbitMQAdapter)
 
 	saveDHTController := controllers.NewSaveValueController(saveDHTUseCase)
 	getValueController := controllers.NewGetValueDHTController(getValueUseCase)
 
-	router := gin.Default()
-
 	routes.SetupRoutes(router, saveDHTController, getValueController)
 
-	return router, saveDHTUseCase, getValueUseCase, serviceNotification, nil
+	return saveDHTUseCase, getValueUseCase, serviceNotification, nil
 }

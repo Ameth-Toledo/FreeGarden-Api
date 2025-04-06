@@ -17,8 +17,8 @@ func NewMySQL(conn *sql.DB) domain.IHumidity {
 }
 
 func (m *MySQL) Save(sensor entities.Humidity) (entities.Humidity, error) {
-	query := `INSERT INTO humidity (humidity, date, user_id) VALUES (?, ?, ?)`
-	_, err := m.conn.Exec(query, sensor.Humidity, sensor.Date, sensor.Id)
+	query := `INSERT INTO soil_moisture_sensors (humidity, user_id) VALUES (?, ?, ?)`
+	_, err := m.conn.Exec(query, sensor.Humidity, sensor.Id)
 	if err != nil {
 		return entities.Humidity{}, fmt.Errorf("error al guardar el registro: %v", err)
 	}
@@ -27,7 +27,7 @@ func (m *MySQL) Save(sensor entities.Humidity) (entities.Humidity, error) {
 
 func (r *MySQL) GetLastValueByUserID(userID int) (entities.Humidity, error) {
 	var sensor entities.Humidity
-	query := "SELECT id, user_id, humidity FROM ph_sensor WHERE user_id = ? ORDER BY id DESC LIMIT 1"
+	query := "SELECT id, user_id, humidity FROM soils_moisture_sensors WHERE user_id = ? ORDER BY id DESC LIMIT 1"
 	err := r.conn.QueryRow(query, userID).Scan(&sensor.Id, &sensor.UserID, &sensor.Humidity)
 	if err != nil {
 		return entities.Humidity{}, err

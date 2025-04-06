@@ -12,41 +12,28 @@ import (
 	"log"
 )
 
-func InitializeSensorPhDependencies() (
-	*gin.Engine,
-	*use_case.SavePH,
-	*use_case.GetValuePH,
-	*repositories.ServiceNotification,
-	error,
-) {
-	// Obtener conexión a la base de datos
+func InitializeSensorPhDependencies(
+	router *gin.Engine,
+) (*use_case.SavePH, *use_case.GetValuePH, *repositories.ServiceNotification, error) {
 	dbConn := core.GetDBPool()
 
-	// Crear el repositorio MySQL para pH
 	phRepo := infrastructure.NewMySQLpHRepository(dbConn)
 
-	// Crear el adaptador de RabbitMQ
 	rabbitMQAdapter, err := adapters.NewRabbitMQAdapter()
 	if err != nil {
 		log.Printf("Error inicializando RabbitMQ: %v", err)
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	// Crear el servicio de notificación con RabbitMQ
 	serviceNotification := repositories.NewServiceNotification(rabbitMQAdapter)
 
-	// Crear casos de uso
 	savePhUseCase := use_case.NewSavePH(phRepo)
 	getValueUseCase := use_case.NewGetValuePH(phRepo)
 
-	// Crear controladores
 	savePhController := controllers.NewSaveValueController(savePhUseCase)
 	getValueController := controllers.NewGetValuePhController(getValueUseCase)
 
-	// Configurar rutas
-	router := gin.Default()
 	routes.SetupRoutes(router, savePhController, getValueController)
 
-	// Retornar todo lo necesario
-	return router, savePhUseCase, getValueUseCase, serviceNotification, nil
+	return savePhUseCase, getValueUseCase, serviceNotification, nil
 }

@@ -3,68 +3,49 @@ package main
 import (
 	"FreeGarden/src/core"
 
-	// Humedad
+	dependencies_dht "FreeGarden/src/sensor_dht11/infrastructure/dependencies"
 	"FreeGarden/src/sensor_humidity/infraestructure/dependencies_h"
-	"FreeGarden/src/sensor_humidity/routes_h"
-
-	// pH
 	dependencies_ph "FreeGarden/src/sensor_pH/infrastructure/dependencies"
-
-	// Ultrasonido
 	dependencies_ultra "FreeGarden/src/sensor_ultrasonico/infrastructure/dependencies"
 
-	// DHT11
-	dependencies_dht "FreeGarden/src/sensor_dht11/infrastructure/dependencies"
+	"FreeGarden/src/sensor_humidity/routes_h"
 
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
 
 func main() {
-	pool := core.GetDBPool()
+	dbPool := core.GetDBPool()
+	router := gin.Default()
 
-	// Inicializar dependencias del sensor de humedad
-	createController,
-		getHumidityByIDController,
-		getAllController,
-		deleteController,
-		getAverageHumidityController,
-		getLatestMeasurementController,
-		_,
-		err := dependencies_h.Init(pool)
-
+	// Humedad
+	saveHumidityCtrl, getHumidityCtrl, _, err := dependencies_h.Init(dbPool)
 	if err != nil {
-		log.Fatalf("Error al inicializar dependencias del sensor de humedad: %v", err)
+		log.Fatalf("Error sensor humedad: %v", err)
+	}
+	routes_h.SetupRoutes(router, saveHumidityCtrl, getHumidityCtrl)
+
+	// Ultrasonido
+	_, _, _, err = dependencies_ultra.InitializeSensorUltrasonicDependencies(router)
+	if err != nil {
+		log.Fatalf("Error sensor ultrasonico: %v", err)
 	}
 
-	// Inicializar dependencias del sensor ultrasónico
-	router, _, _, _, err := dependencies_ultra.InitializeSensorUltrasonicDependencies()
+	// pH
+	_, _, _, err = dependencies_ph.InitializeSensorPhDependencies(router)
 	if err != nil {
-		log.Fatalf("Error al inicializar dependencias del sensor ultrasónico: %v", err)
+		log.Fatalf("Error sensor pH: %v", err)
 	}
 
-	// Inicializar dependencias del sensor de pH
-	router, _, _ = dependencies_ph.InitializeSensorPhDependencies()
-
-	// Inicializar dependencias del sensor DHT11
-	router, _, _, _, err = dependencies_dht.InitializeSensorDHTDependencies()
+	// DHT11
+	_, _, _, err = dependencies_dht.InitializeSensorDHTDependencies(router)
 	if err != nil {
-		log.Fatalf("Error al inicializar dependencias del sensor DHT11: %v", err)
+		log.Fatalf("Error sensor DHT11: %v", err)
 	}
 
-	// Registrar rutas del sensor de humedad
-	routes_h.RegisterHumidityRoutes(
-		router,
-		createController,
-		getHumidityByIDController,
-		getAllController,
-		deleteController,
-		getAverageHumidityController,
-		getLatestMeasurementController,
-	)
-
-	// Iniciar servidor en el puerto 8080
-	err = router.Run(":8080")
-	if err != nil {
-		log.Fatalf("Error al iniciar el servidor: %v", err)
+	// Run server
+	if err := router.Run(":8080"); err != nil {
+		log.Fatalf("No se pudo iniciar el servidor: %v", err)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterHumidityRoutes(
+func SetupRoutes(
 	router *gin.Engine,
 	createController *controllers.SaveHumidityController,
 	getController *controllers.GetValueHumidityController,
