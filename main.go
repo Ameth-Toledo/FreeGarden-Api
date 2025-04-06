@@ -1,16 +1,42 @@
 package main
 
 import (
+	"FreeGarden/src/core"
+	"FreeGarden/src/sensor_humidity/infraestructure/dependencies_h"
+	"FreeGarden/src/sensor_humidity/routes_h"
 	"FreeGarden/src/sensor_ultrasonico/infrastructure/dependencies"
 	"log"
 )
 
 func main() {
-	// Inicializa solo las dependencias necesarias para el sensor ultrasonico
+
+	pool := core.GetDBPool()
+
+	createController,
+		getHumidityByIDController,
+		getAllController,
+		deleteController,
+		getAverageHumidityController,
+		getLatestMeasurementController,
+		_,
+		err := dependencies_h.Init(pool)
+
+	if err != nil {
+		log.Fatalf("Error al inicializar dependencias del sensor de humedad: %v", err)
+	}
+
 	router, _, _ := dependencies.InitializeSensorUltrasonicDependencies()
 
-	// Inicia el servidor en el puerto 8080 (o el puerto que prefieras)
-	err := router.Run(":8080")
+	routes_h.RegisterHumidityRoutes(
+		router,
+		createController,
+		getHumidityByIDController,
+		getAllController,
+		deleteController,
+		getAverageHumidityController,
+		getLatestMeasurementController,
+	)
+	err = router.Run(":8080")
 	if err != nil {
 		log.Fatalf("Error al iniciar el servidor: %v", err)
 	}
