@@ -13,6 +13,7 @@ func NewServiceNotification(notificationPort NotificationPort) *ServiceNotificat
 	return &ServiceNotification{notificationPort: notificationPort}
 }
 
+// ✅ Este método es opcional
 func (sn *ServiceNotification) NotifyAppointmentCreated(sensor entities.PhSensor) error {
 	log.Println("Notificando la creación del sensor...")
 
@@ -22,4 +23,9 @@ func (sn *ServiceNotification) NotifyAppointmentCreated(sensor entities.PhSensor
 		return err
 	}
 	return nil
+}
+
+// ✅ Este método implementa la interfaz NotificationPort
+func (sn *ServiceNotification) PublishEvent(eventType string, sensor entities.PhSensor) error {
+	return sn.notificationPort.PublishEvent(eventType, sensor)
 }
