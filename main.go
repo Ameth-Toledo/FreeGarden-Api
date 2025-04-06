@@ -45,7 +45,7 @@ func main() {
 	}
 
 	// Run server
-	if err := router.Run(":8080"); err != nil {
+	if err := router.Run(":8081"); err != nil {
 		log.Fatalf("No se pudo iniciar el servidor: %v", err)
 	}
 }
