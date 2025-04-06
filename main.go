@@ -19,33 +19,28 @@ func main() {
 	dbPool := core.GetDBPool()
 	router := gin.Default()
 
-	// Humedad
 	saveHumidityCtrl, getHumidityCtrl, _, err := dependencies_h.Init(dbPool)
 	if err != nil {
 		log.Fatalf("Error sensor humedad: %v", err)
 	}
 	routes_h.SetupRoutes(router, saveHumidityCtrl, getHumidityCtrl)
 
-	// Ultrasonido
 	_, _, _, err = dependencies_ultra.InitializeSensorUltrasonicDependencies(router)
 	if err != nil {
 		log.Fatalf("Error sensor ultrasonico: %v", err)
 	}
 
-	// pH
 	_, _, _, err = dependencies_ph.InitializeSensorPhDependencies(router)
 	if err != nil {
 		log.Fatalf("Error sensor pH: %v", err)
 	}
 
-	// DHT11
 	_, _, _, err = dependencies_dht.InitializeSensorDHTDependencies(router)
 	if err != nil {
 		log.Fatalf("Error sensor DHT11: %v", err)
 	}
 
-	// Run server
-	if err := router.Run(":8081"); err != nil {
+	if err := router.Run(":8088"); err != nil {
 		log.Fatalf("No se pudo iniciar el servidor: %v", err)
 	}
 }
