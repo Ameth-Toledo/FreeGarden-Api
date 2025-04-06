@@ -11,10 +11,7 @@ import (
 	"log"
 )
 
-// InitializeSensorDHTDependencies configura las dependencias necesarias para el sensor DHT11.
-func InitializeSensorDHTDependencies(
-	router *gin.Engine,
-) (*use_case.CreateDHT, *use_case.GetValueDHT, *repositories.ServiceNotification, error) {
+func InitializeSensorDHTDependencies(router *gin.Engine) (*use_case.CreateDHT, *use_case.GetValueDHT, *repositories.ServiceNotification, error) {
 	dbConn := core.GetDBPool()
 
 	DHTRepo := adapters.NewMySQLDHTRepository(dbConn)
@@ -30,7 +27,7 @@ func InitializeSensorDHTDependencies(
 
 	serviceNotification := repositories.NewServiceNotification(rabbitMQAdapter)
 
-	saveDHTController := controllers.NewSaveValueController(saveDHTUseCase)
+	saveDHTController := controllers.NewSaveValueController(saveDHTUseCase, serviceNotification)
 	getValueController := controllers.NewGetValueDHTController(getValueUseCase)
 
 	routes.SetupRoutes(router, saveDHTController, getValueController)

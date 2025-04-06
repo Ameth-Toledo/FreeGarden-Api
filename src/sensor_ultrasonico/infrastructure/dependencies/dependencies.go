@@ -31,7 +31,7 @@ func InitializeSensorUltrasonicDependencies(
 	saveUltrasonicUseCase := use_case.NewUltrasonicSave(ultrasonicRepo)
 	getDistanceUseCase := use_case.NewUltrasonicGetDistance(ultrasonicRepo)
 
-	saveDistanceController := controllers.NewSaveDistanceController(saveUltrasonicUseCase)
+	saveDistanceController := controllers.NewSaveDistanceController(saveUltrasonicUseCase, serviceNotification)
 	getDistanceController := controllers.NewGetDistanceController(getDistanceUseCase)
 
 	routes.SetupRoutes(router, saveDistanceController, getDistanceController)

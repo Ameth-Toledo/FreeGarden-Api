@@ -12,7 +12,9 @@ func SetupRoutes(
 ) {
 	api := router.Group("/api/sensor-humidity")
 	{
+		// Ruta para guardar la humedad
 		api.POST("/create", createController.SaveHumidity)
+		// Ruta para obtener el valor de la humedad
 		api.GET("/get/:user_id", getController.GetValue)
 	}
 }

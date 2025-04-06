@@ -40,5 +40,8 @@ func (controller *SaveValueController) SaveValue(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Value temperature saved and published successfully", "data": savedSensor})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Value saved and event published successfully",
+		"data":    savedSensor,
+	})
 }
